@@ -11,6 +11,11 @@ public class Entity extends Sprite {
     private Vector2 velocity = new Vector2(0, 0);
     private boolean markedForDestruction = false;
 
+    public Entity() {
+        super(Engine.getGameSpriteComponent().getScene());
+        Engine.entityCreated(this);
+    }
+
     public Entity(int sizeX, int sizeY, Vector2 globalPosition, Color color) {
         super(Engine.getGameSpriteComponent().getScene());
 

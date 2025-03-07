@@ -5,6 +5,7 @@ import basicgraphics.Sprite;
 import basicgraphics.SpriteComponent;
 import basicgraphics.Task;
 import shootgame.Enemy;
+import shootgame.engine.particles.ParticleSystem;
 
 import java.awt.event.MouseEvent;
 import java.time.Clock;
@@ -39,6 +40,7 @@ public class Engine {
         }
 
         ArrayList<Entity> entitiesMarkedForDestruction = new ArrayList<Entity>();
+        ArrayList<ParticleSystem> particleSystemsNeedingToEmit = new ArrayList<ParticleSystem>();
 
         for (Entity entity : allEntities) {
             Vector2 newPosition = entity.getGlobalPosition().add(entity.getVelocity().multiply(deltaTime));
@@ -67,6 +69,18 @@ public class Engine {
             if (entity.getMarkedForDestruction()) {
                 entitiesMarkedForDestruction.add(entity);
             }
+
+            if (entity instanceof ParticleSystem) {
+                ParticleSystem particles = (ParticleSystem) entity;
+                if (particles.getParticlesToEmit() > 0) {
+                    particleSystemsNeedingToEmit.add(particles);
+                }
+            }
+        }
+
+        for (ParticleSystem particles : particleSystemsNeedingToEmit) {
+            particles.emit(particles.getParticlesToEmit());
+            particles.setParticlesToEmit(0);
         }
 
         for (Entity entityMarkedForDestruction : entitiesMarkedForDestruction) {

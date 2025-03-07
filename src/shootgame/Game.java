@@ -3,7 +3,9 @@ package shootgame;
 import basicgraphics.*;
 import basicgraphics.examples.BasicGraphics;
 import shootgame.engine.Engine;
+import shootgame.engine.Range;
 import shootgame.engine.Vector2;
+import shootgame.engine.particles.ParticleSystem;
 
 import javax.swing.*;
 import java.awt.event.*;
@@ -172,5 +174,18 @@ public class Game {
                 enemy.takeDamage(25);
             }
         });
+
+        // particle
+        ParticleSystem particles = new ParticleSystem(
+                new Vector2(0, 0),
+                new Range(-25, 25),
+                new Range(150, 700),
+                new Range(-3, 3),
+                new Range(-100, 3),
+                new Range(1, 2),
+                250
+        );
+
+        particles.setEnabled(true);
     }
 }
