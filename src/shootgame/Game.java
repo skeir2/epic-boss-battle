@@ -1,13 +1,12 @@
 package shootgame;
 
 import basicgraphics.*;
+import basicgraphics.examples.BasicGraphics;
 import shootgame.engine.Engine;
+import shootgame.engine.Vector2;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import java.time.Clock;
 import java.util.*;
 
@@ -39,7 +38,7 @@ public class Game {
             @Override
             public void actionPerformed(ActionEvent ae) {
                 Enemy enemy = new Enemy();
-                enemy.getEntity().setPosition(random.nextDouble(-100, 100), random.nextDouble(-100, 100));
+                enemy.setGlobalPosition(new Vector2(random.nextDouble(-100, 100), random.nextDouble(-100, 100)));
             }
         });
         mainFrame.add("Bottom", bottomButton);
@@ -53,13 +52,13 @@ public class Game {
 
         // gaming
         Shooter shooter = new Shooter();
-        Engine.setEntityBeingControlled(shooter.getEntity());
+        Engine.setCameraTarget(shooter);
 
         Enemy enemy = new Enemy();
-        enemy.getEntity().setPosition(0, 0);
+        enemy.setGlobalPosition(new Vector2(0, 0));
 
         Enemy enemy2 = new Enemy();
-        enemy2.getEntity().setPosition(50, 50);
+        enemy2.setGlobalPosition(new Vector2(50, 50));
 
         KeyAdapter key = new KeyAdapter() {
             final List<Integer> shootCodes = Arrays.asList(
@@ -83,30 +82,31 @@ public class Game {
             }
 
             private void updateShooterVelocity() {
-                int xVel = 0;
-                int yVel = 0;
+                int xDir = 0;
+                int yDir = 0;
                 int speed = 250;
 
                 if (keysHeld.get(KeyEvent.VK_W)) {
-                    yVel = speed;
+                    yDir = 1;
                 }
                 if (keysHeld.get(KeyEvent.VK_S)) {
-                    yVel = -speed;
+                    yDir = -1;
                 }
                 if (keysHeld.get(KeyEvent.VK_W) && keysHeld.get(KeyEvent.VK_S)) {
-                    yVel = 0;
+                    yDir = 0;
                 }
                 if (keysHeld.get(KeyEvent.VK_D)) {
-                    xVel = speed;
+                    xDir = 1;
                 }
                 if (keysHeld.get(KeyEvent.VK_A)) {
-                    xVel = -speed;
+                    xDir = -1;
                 }
                 if (keysHeld.get(KeyEvent.VK_A) && keysHeld.get(KeyEvent.VK_D)) {
-                    xVel = 0;
+                    xDir = 0;
                 }
 
-                shooter.getEntity().setVelocity(xVel, yVel);
+                Vector2 velocity = (new Vector2(xDir, yDir)).unit().multiply(speed);
+                shooter.setVelocity(velocity);
             }
 
             @Override
@@ -129,6 +129,48 @@ public class Game {
         };
         mainFrame.addKeyListener(key);
 
+        Vector2 offset = new Vector2(0, 0);
+        Engine.setCameraOffset(offset);
+
         Background bg = new Background();
+
+        // mouse
+        MouseListener ml = new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                Vector2 mouseClickGlobalPosition = Engine.getMouseClickGlobalPosition(e);
+                Vector2 shooterPosition = shooter.getGlobalPosition();
+
+                Vector2 direction = mouseClickGlobalPosition.subtract(shooterPosition).unit();
+                Bullet bullet = new Bullet(shooter.getGlobalPosition(), direction.multiply(700));
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+            }
+        };
+        gameSpriteComponent.addMouseListener(ml);
+
+        // collisions
+        gameSpriteComponent.addSpriteSpriteCollisionListener(shootgame.Enemy.class, shootgame.Bullet.class, new SpriteSpriteCollisionListener<shootgame.Enemy, shootgame.Bullet>() {
+            @Override
+            public void collision(shootgame.Enemy enemy, shootgame.Bullet bullet) {
+                bullet.destroy();
+                enemy.takeDamage(25);
+            }
+        });
     }
 }

@@ -7,12 +7,11 @@ import java.awt.*;
 
 public class Entity extends Sprite {
     static int ballSize = 40;
-    private double positionX = 0;
-    private double positionY = 0;
-    private double velocityX = 0;
-    private double velocityY = 0;
+    private Vector2 globalPosition = new Vector2(0, 0);
+    private Vector2 velocity = new Vector2(0, 0);
+    private boolean markedForDestruction = false;
 
-    public Entity(int sizeX, int sizeY, double positionX, double positionY, Color color) {
+    public Entity(int sizeX, int sizeY, Vector2 globalPosition, Color color) {
         super(Engine.getGameSpriteComponent().getScene());
 
         Image im1 = BasicFrame.createImage(sizeX, sizeY);
@@ -23,34 +22,42 @@ public class Entity extends Sprite {
 
         setPicture(p);
 
-        setPosition(positionX, positionY);
+        setGlobalPosition(globalPosition);
 
         Engine.entityCreated(this);
     }
 
-    public double getPositionX() {
-        return positionX;
+    public Vector2 getGlobalPosition() {
+        return globalPosition;
     }
 
-    public double getPositionY() {
-        return positionY;
+    public void setGlobalPosition(Vector2 globalPosition) {
+        this.globalPosition = globalPosition;
     }
 
-    public void setPosition(double x, double y) {
-        positionX = x;
-        positionY = y;
+    public Vector2 getVelocity() {
+        return velocity;
     }
 
-    public double getVelocityX() {
-        return velocityX;
+    public void setVelocity(Vector2 velocity) {
+        this.velocity = velocity;
     }
 
-    public double getVelocityY() {
-        return velocityY;
+    @Override
+    public void destroy() {
+        Engine.entityDestroyed(this);
+        super.destroy();
     }
 
-    public void setVelocity(double x, double y) {
-        velocityX = x;
-        velocityY = y;
+    public boolean getMarkedForDestruction() {
+        return markedForDestruction;
+    }
+
+    public void markForDestruction() {
+        markedForDestruction = true;
+    }
+
+    public void update(double deltaTime) {
+
     }
 }

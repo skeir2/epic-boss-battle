@@ -6,6 +6,7 @@ import basicgraphics.SpriteComponent;
 import basicgraphics.Task;
 import shootgame.Enemy;
 
+import java.awt.event.MouseEvent;
 import java.time.Clock;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -15,8 +16,10 @@ public class Engine {
     static Random random = new Random();
 
     private static SpriteComponent gameSpriteComponent;
-    private static Entity entityBeingControlled;
     private static ArrayList<Entity> allEntities = new ArrayList<Entity>();
+
+    private static Entity cameraTarget;
+    private static Vector2 cameraOffset = new Vector2(0, 0);
 
     private static Clock clock = Clock.systemDefaultZone();
     private static long lastTickTime = clock.millis();
@@ -30,35 +33,44 @@ public class Engine {
             spawnerTimer -= 3;
 
             Enemy enemy = new Enemy();
-            enemy.getEntity().setPosition(random.nextDouble(-100, 100), random.nextDouble(-100, 100));
+
+            Vector2 randomPosition = new Vector2(random.nextDouble(-100, 100), random.nextDouble(-100, 100));
+            enemy.setGlobalPosition(randomPosition);
         }
 
+        ArrayList<Entity> entitiesMarkedForDestruction = new ArrayList<Entity>();
+
         for (Entity entity : allEntities) {
-            double newPositionX = (entity.getPositionX() + entity.getVelocityX() * deltaTime);
-            double newPositionY = (entity.getPositionY() + entity.getVelocityY() * deltaTime);
+            Vector2 newPosition = entity.getGlobalPosition().add(entity.getVelocity().multiply(deltaTime));
+            entity.setGlobalPosition(newPosition);
 
-            entity.setPosition(newPositionX, newPositionY);
-
-            if (entity == entityBeingControlled) {
+            if (entity == cameraTarget) {
                 int width = gameSpriteComponent.getWidth();
                 int height = gameSpriteComponent.getHeight();
-                entity.setCenterX(width / 2);
-                entity.setCenterY(height / 2);
+                entity.setCenterX((width / (double) 2) - cameraOffset.X);
+                entity.setCenterY((height / (double) 2) + cameraOffset.Y);
             } else {
                 int width = gameSpriteComponent.getWidth();
                 int height = gameSpriteComponent.getHeight();
 
-                double globalX = entity.getPositionX();
-                double globalY = entity.getPositionY();
-                double cameraX = entityBeingControlled.getPositionX();
-                double cameraY = entityBeingControlled.getPositionY();
+                Vector2 globalPosition = entity.getGlobalPosition();
+                Vector2 cameraPosition = cameraTarget.getGlobalPosition();
 
-                double offsetFromCenterX = globalX - cameraX;
-                double offsetFromCenterY = globalY - cameraY;
+                Vector2 offsetFromCenter = new Vector2(globalPosition.X - cameraPosition.X, globalPosition.Y - cameraPosition.Y);
 
-                entity.setCenterX((width / 2) + offsetFromCenterX);
-                entity.setCenterY((height / 2) - offsetFromCenterY);
+                entity.setCenterX((width / (double) 2) + offsetFromCenter.X - cameraOffset.X);
+                entity.setCenterY((height / (double) 2) - offsetFromCenter.Y + cameraOffset.Y);
             }
+
+            entity.update(deltaTime);
+
+            if (entity.getMarkedForDestruction()) {
+                entitiesMarkedForDestruction.add(entity);
+            }
+        }
+
+        for (Entity entityMarkedForDestruction : entitiesMarkedForDestruction) {
+            entityMarkedForDestruction.destroy();
         }
     }
 
@@ -77,12 +89,20 @@ public class Engine {
         return gameSpriteComponent;
     }
 
-    public static void setEntityBeingControlled(Entity entity) {
-        entityBeingControlled = entity;
+    public static void setCameraTarget(Entity entity) {
+        cameraTarget = entity;
     }
 
-    public static Entity getEntityBeingControlled() {
-        return entityBeingControlled;
+    public static Entity getCameraTarget() {
+        return cameraTarget;
+    }
+
+    public static void setCameraOffset(Vector2 offset) {
+        cameraOffset = offset;
+    }
+
+    public static Vector2 getCameraOffset() {
+        return cameraOffset;
     }
 
     public static void entityCreated(Entity entity) {
@@ -100,5 +120,26 @@ public class Engine {
             update(deltaTime);
             lastTickTime = clock.millis();
         }
+    }
+
+    public static Vector2 convertScreenPositionToGlobalPosition(Vector2 screenPos) {
+        Vector2 cameraTargetPos = cameraTarget.getGlobalPosition();
+        Vector2 cameraPos = cameraTargetPos.add(cameraOffset);
+        double width = gameSpriteComponent.getWidth();
+        double height = gameSpriteComponent.getHeight();
+        Vector2 offsetFromCenterOfScreen = new Vector2((-width / 2.0) + screenPos.X, (-height / 2.0) + (height - screenPos.Y));
+        double x = cameraPos.X + offsetFromCenterOfScreen.X;
+        double y = cameraPos.Y + offsetFromCenterOfScreen.Y;
+
+        return new Vector2(x, y);
+    }
+
+    public static Vector2 getMouseClickGlobalPosition(MouseEvent e) {
+        Vector2 screenPos = new Vector2(e.getX(), e.getY());
+        return convertScreenPositionToGlobalPosition(screenPos);
+    }
+
+    public static double getTick() {
+        return clock.millis() / (double) 1000;
     }
 }

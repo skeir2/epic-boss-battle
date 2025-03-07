@@ -4,33 +4,38 @@ import basicgraphics.ClockWorker;
 import basicgraphics.Task;
 import shootgame.engine.Engine;
 import shootgame.engine.Entity;
+import shootgame.engine.Vector2;
 
 import java.awt.*;
 import java.util.Random;
 
-public class Enemy {
+public class Enemy extends Entity {
     static Random random = new Random();
     double speed = random.nextDouble(40, 200);
-
-    Entity entity;
+    private double health = 100;
 
     public Enemy() {
-        entity = new Entity(40, 40, 0, 0, Color.orange);
-        entity.setDrawingPriority(60);
-
-        ClockWorker.addTask(new Task() {
-            @Override
-            public void run() {
-                Entity target = Engine.getEntityBeingControlled();
-                double xDifference = (target.getPositionX() - entity.getPositionX());
-                double yDifference = (target.getPositionY() - entity.getPositionY());
-
-                entity.setVelocity(Math.signum(xDifference) * speed, Math.signum(yDifference) * speed);
-            }
-        });
+        super(40, 40, new Vector2(0, 0), Color.orange);
+        setDrawingPriority(60);
     }
 
-    public Entity getEntity() {
-        return entity;
+    public void takeDamage(double damage) {
+        health -= damage;
+
+        if (health <= 0) {
+            markForDestruction();
+        }
+    }
+
+    @Override
+    public void update(double deltaTime) {
+        Entity target = Engine.getCameraTarget();
+
+        Vector2 targetPosition = target.getGlobalPosition();
+        Vector2 entityPosition = getGlobalPosition();
+        Vector2 direction = targetPosition.subtract(entityPosition).unit();
+        Vector2 velocity = direction.multiply(speed);
+
+        setVelocity(velocity);
     }
 }
