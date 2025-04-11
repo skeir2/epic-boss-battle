@@ -92,7 +92,11 @@ public class ParticleSystem extends Entity {
 
     @Override
     public void update(double deltaTime) {
-        progress += (rate * deltaTime);
+        if (enabled) {
+            progress += (rate * deltaTime);
+        } else {
+            progress = 0;
+        }
 
         double timePassed = Engine.getTick() - startTick;
         Vector2 newUpVector = new Vector2(Math.cos(timePassed * 3), Math.sin(timePassed * 3));

@@ -2,15 +2,21 @@ package shootgame;
 
 import basicgraphics.*;
 import basicgraphics.examples.BasicGraphics;
+import basicgraphics.images.Picture;
 import shootgame.engine.Engine;
 import shootgame.engine.Range;
 import shootgame.engine.Vector2;
+import shootgame.engine.gui.GuiFrame;
+import shootgame.engine.gui.ImageFrame;
+import shootgame.engine.gui.TextFrame;
 import shootgame.engine.particles.ParticleSystem;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.*;
 import java.time.Clock;
 import java.util.*;
+import java.util.List;
 
 public class Game {
     static Random random = new Random();
@@ -61,6 +67,8 @@ public class Game {
 
         Enemy enemy2 = new Enemy();
         enemy2.setGlobalPosition(new Vector2(50, 50));
+
+        GameUI.init();
 
         KeyAdapter key = new KeyAdapter() {
             final List<Integer> shootCodes = Arrays.asList(
@@ -187,5 +195,41 @@ public class Game {
         );
 
         particles.setEnabled(true);
+
+        // frame
+        TextFrame rotationTextFrame = new TextFrame(new Vector2(0.5, 0.5), new Vector2(1, 1), new Vector2(0, 0), "1");
+        ImageFrame imageFrame = new ImageFrame(new Vector2(0, 0.5), new Vector2(0.5, 3), new Vector2(0, 0), "light-cat-white.png");
+        TextFrame textFrame = new TextFrame(new Vector2(0.5, 0.5), new Vector2(1, 1), new Vector2(0, 0), "Epic text");
+        GuiFrame guiFrame2 = new GuiFrame(new Vector2(1, 0.5), new Vector2(0.25, 2), new Vector2(0, 0));
+        GuiFrame guiFrame = new GuiFrame(new Vector2(0.5, 0.5), new Vector2(0.25, 0.25), new Vector2(0, 0));
+        guiFrame.setBackgroundColor(Color.blue);
+        guiFrame2.setParent(guiFrame);
+        textFrame.setParent(guiFrame2);
+        imageFrame.setParent(guiFrame);
+        rotationTextFrame.setParent(imageFrame);
+        ClockWorker.addTask(new Task() {
+            @Override
+            public void run() {
+                double currentTick = Engine.getTick();
+                double x = 0.5 + (Math.sin(currentTick) * 0.5);
+                double y = 0.5 + (Math.cos(currentTick) * 0.5);
+            //    guiFrame.setPos(new Vector2(x, y));
+
+                double xSize = 0.5 + (Math.sin(currentTick * 0.423) * 0.5);
+                guiFrame.setSizeScale(new Vector2(xSize, guiFrame.getSizeScale().Y));
+
+                double x2 = 0.5 + (Math.sin(currentTick * 3.3) * 0.5);
+                double y2 = 0.5 + (Math.cos(currentTick * 3.3) * 0.5);
+                guiFrame2.setPos(new Vector2(x2, y2));
+
+                float hue = (1 + (float)Math.sin(currentTick * 2)) * 0.5f;
+                Color newColor = Color.getHSBColor(hue, 1, 1);
+                guiFrame2.setBackgroundColor(newColor);
+
+                double rotation = (currentTick * 100) % 360;
+                imageFrame.setRotation(rotation);
+                rotationTextFrame.setFrameText(String.format("%.2f", (rotation * Math.PI) / 180));
+            }
+        });
     }
 }
