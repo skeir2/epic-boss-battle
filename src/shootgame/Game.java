@@ -3,6 +3,7 @@ package shootgame;
 import basicgraphics.*;
 import basicgraphics.examples.BasicGraphics;
 import basicgraphics.images.Picture;
+import shootgame.abilities.ShootAbility;
 import shootgame.engine.Engine;
 import shootgame.engine.Range;
 import shootgame.engine.Vector2;
@@ -19,6 +20,7 @@ import java.util.*;
 import java.util.List;
 
 public class Game {
+    public static Shooter shooter;
     static Random random = new Random();
     static String[][] layout = {
             {"Top"},
@@ -59,7 +61,7 @@ public class Game {
         mainFrame.show();
 
         // gaming
-        Shooter shooter = new Shooter();
+        shooter = new Shooter();
         Engine.setCameraTarget(shooter);
 
         Enemy enemy = new Enemy();
@@ -69,6 +71,10 @@ public class Game {
         enemy2.setGlobalPosition(new Vector2(50, 50));
 
         GameUI.init();
+
+        GuiFrame shootAbilityGuiFrame = GameUI.addAbilityGuiFrame();
+        ShootAbility shootAbility = new ShootAbility();
+        shootAbility.connectToAbilityGuiFrame(shootAbilityGuiFrame);
 
         KeyAdapter key = new KeyAdapter() {
             final List<Integer> shootCodes = Arrays.asList(
@@ -153,11 +159,15 @@ public class Game {
 
             @Override
             public void mousePressed(MouseEvent e) {
+                /*
                 Vector2 mouseClickGlobalPosition = Engine.getMouseClickGlobalPosition(e);
                 Vector2 shooterPosition = shooter.getGlobalPosition();
 
                 Vector2 direction = mouseClickGlobalPosition.subtract(shooterPosition).unit();
                 Bullet bullet = new Bullet(shooter.getGlobalPosition(), direction.multiply(700));
+                 */
+                shootAbility.lastMouseEvent = e; //funny
+                shootAbility.use();
             }
 
             @Override

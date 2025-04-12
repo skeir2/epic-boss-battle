@@ -48,6 +48,6 @@ public class ImageFrame extends GuiFrame {
         g2.drawImage(img, xform, currentPic);
         Picture newPic = new Picture(scaledImage);
         setPicture(newPic);
-        setDrawingPriority(1000);
+        setDrawingPriority(1000 + zIndex);
     }
 }

@@ -1,4 +1,4 @@
 package shootgame.abilities;
 
-public class melee {
+public class DashAbility {
 }

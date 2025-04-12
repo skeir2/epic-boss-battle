@@ -1,4 +1,4 @@
 package shootgame.abilities;
 
-public class dash {
+public class HealAbility {
 }

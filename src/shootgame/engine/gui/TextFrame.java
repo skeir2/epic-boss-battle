@@ -29,7 +29,7 @@ public class TextFrame extends GuiFrame {
             Graphics newGraphics = newImg.getGraphics();
             Picture newPic = new Picture(newImg);
             setPicture(newPic);
-            setDrawingPriority(1001);
+            setDrawingPriority(1000 + zIndex);
             return;
         }
 
@@ -47,6 +47,6 @@ public class TextFrame extends GuiFrame {
         newGraphics.drawString(text, 0, (int) pixelSize.Y);
         Picture newPic = new Picture(newImg);
         setPicture(newPic);
-        setDrawingPriority(1000);
+        setDrawingPriority(1000 + zIndex);
     }
 }

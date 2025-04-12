@@ -19,6 +19,7 @@ public class GuiFrame extends Sprite {
     Color backgroundColor = Color.black;
     double rotation = 0;
     int zIndex = 0;
+    String name = "GuiFrame";
     GuiFrame parent = null;
     ArrayList<GuiFrame> children = new ArrayList<>();
 
@@ -140,7 +141,7 @@ public class GuiFrame extends Sprite {
             Graphics newGraphics = newImg.getGraphics();
             Picture newPic = new Picture(newImg);
             setPicture(newPic);
-            setDrawingPriority(1000);
+            setDrawingPriority(1000 + zIndex);
             return;
         }
 
@@ -150,7 +151,7 @@ public class GuiFrame extends Sprite {
         newGraphics.fillRect(0, 0, (int) pixelSize.X, (int) pixelSize.Y);
         Picture newPic = new Picture(newImg);
         setPicture(newPic);
-        setDrawingPriority(1000);
+        setDrawingPriority(1000 + zIndex);
     }
 
     public Vector2 getSizeScale() {
@@ -160,7 +161,7 @@ public class GuiFrame extends Sprite {
     public void setParent(GuiFrame parent) {
         this.parent = parent;
         parent.children.add(this);
-        update();
+        update(true);
     }
 
     @Override
@@ -181,5 +182,32 @@ public class GuiFrame extends Sprite {
         double rads = (rotation * Math.PI) / 180;
    //     this.setVel(Math.sin(rads), Math.cos(rads));
         this.setHeadingOffset(rads);
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setAnchorPoint(Vector2 anchorPoint) {
+        this.anchorPoint = anchorPoint;
+        update();
+    }
+
+    public Vector2 getAnchorPoint() {
+        return anchorPoint;
+    }
+
+    public ArrayList<GuiFrame> getChildren() {
+        return children;
+    }
+
+    public void setZIndex(int zIndex) {
+        this.zIndex = zIndex;
+        setDrawingPriority(1000 + zIndex);
+        update();
     }
 }
