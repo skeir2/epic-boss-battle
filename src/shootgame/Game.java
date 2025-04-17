@@ -207,6 +207,7 @@ public class Game {
         particles.setEnabled(true);
 
         // frame
+        /*
         TextFrame rotationTextFrame = new TextFrame(new Vector2(0.5, 0.5), new Vector2(1, 1), new Vector2(0, 0), "1");
         ImageFrame imageFrame = new ImageFrame(new Vector2(0, 0.5), new Vector2(0.5, 3), new Vector2(0, 0), "light-cat-white.png");
         TextFrame textFrame = new TextFrame(new Vector2(0.5, 0.5), new Vector2(1, 1), new Vector2(0, 0), "Epic text");
@@ -241,5 +242,6 @@ public class Game {
                 rotationTextFrame.setFrameText(String.format("%.2f", (rotation * Math.PI) / 180));
             }
         });
+         */
     }
 }

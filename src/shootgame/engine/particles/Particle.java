@@ -19,6 +19,7 @@ public class Particle extends Entity {
 
     public Particle(Vector2 position, Vector2 velocity, Vector2 acceleration, Vector2 size, Vector2 upVector, double lifespan, Picture pic) {
         super();
+        setDrawingPriority(1);
         setPicture(pic);
         setGlobalPosition(position);
         setX(-100);

@@ -9,8 +9,7 @@ import java.time.Clock;
 
 public class Shooter extends Entity {
     public Shooter() {
-        super(40, 40, new Vector2(0, 0), Color.blue);
-        setDrawingPriority(100);
+        super(40, 40, new Vector2(0, 0), Color.blue, 15);
     }
 
     @Override

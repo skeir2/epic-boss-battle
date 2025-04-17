@@ -15,8 +15,7 @@ public class Enemy extends Entity {
     private double health = 100;
 
     public Enemy() {
-        super(40, 40, new Vector2(0, 0), Color.orange);
-        setDrawingPriority(60);
+        super(40, 40, new Vector2(0, 0), Color.orange, 10);
     }
 
     public void takeDamage(double damage) {

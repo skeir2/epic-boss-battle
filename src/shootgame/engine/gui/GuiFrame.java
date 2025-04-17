@@ -17,21 +17,21 @@ public class GuiFrame extends Sprite {
     Vector2 sizeOffset;
     Vector2 anchorPoint = new Vector2(0.5, 0.5);
     Color backgroundColor = Color.black;
+    double backgroundTransparency = 0;
     double rotation = 0;
-    int zIndex = 0;
     String name = "GuiFrame";
     GuiFrame parent = null;
     ArrayList<GuiFrame> children = new ArrayList<>();
 
-    public GuiFrame(Vector2 pos, Vector2 sizeScale, Vector2 sizeOffset) {
+    public GuiFrame(Vector2 pos, Vector2 sizeScale, Vector2 sizeOffset, int drawingPriority) {
         super(Engine.getGameSpriteComponent().getScene());
 
         Image img = BasicFrame.createImage(10, 10);
         Graphics graphics = img.getGraphics();
         graphics.setColor(backgroundColor);
         Picture pic = new Picture(img).transparentBright();
+        setDrawingPriority(drawingPriority);
         setPicture(pic);
-        setDrawingPriority(1000 + zIndex);
 
         this.pos = pos;
         this.sizeScale = sizeScale;
@@ -141,17 +141,16 @@ public class GuiFrame extends Sprite {
             Graphics newGraphics = newImg.getGraphics();
             Picture newPic = new Picture(newImg);
             setPicture(newPic);
-            setDrawingPriority(1000 + zIndex);
             return;
         }
 
         Image newImg = BasicFrame.createImage((int) pixelSize.X, (int) pixelSize.Y);
         Graphics newGraphics = newImg.getGraphics();
-        newGraphics.setColor(backgroundColor);
+        Color newColor = new Color(backgroundColor.getRed(), backgroundColor.getGreen(), backgroundColor.getBlue(), (int) ((1 - backgroundTransparency) * 255));
+        newGraphics.setColor(newColor);
         newGraphics.fillRect(0, 0, (int) pixelSize.X, (int) pixelSize.Y);
         Picture newPic = new Picture(newImg);
         setPicture(newPic);
-        setDrawingPriority(1000 + zIndex);
     }
 
     public Vector2 getSizeScale() {
@@ -205,9 +204,12 @@ public class GuiFrame extends Sprite {
         return children;
     }
 
-    public void setZIndex(int zIndex) {
-        this.zIndex = zIndex;
-        setDrawingPriority(1000 + zIndex);
-        update();
+    public double getBackgroundTransparency() {
+        return backgroundTransparency;
+    }
+
+    public void setBackgroundTransparency(double backgroundTransparency) {
+        this.backgroundTransparency = Math.clamp(backgroundTransparency, 0, 1);
+        update(true);
     }
 }

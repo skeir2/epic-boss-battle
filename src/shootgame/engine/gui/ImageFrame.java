@@ -12,8 +12,8 @@ import java.awt.image.ImageObserver;
 public class ImageFrame extends GuiFrame {
     private Picture currentPic;
     private String imageName;
-    public ImageFrame(Vector2 pos, Vector2 sizeScale, Vector2 sizeOffset, String imageName) {
-        super(pos, sizeScale, sizeOffset);
+    public ImageFrame(Vector2 pos, Vector2 sizeScale, Vector2 sizeOffset, String imageName, int drawingPriority) {
+        super(pos, sizeScale, sizeOffset, drawingPriority);
         this.imageName = imageName;
         update(true);
     }
@@ -28,7 +28,6 @@ public class ImageFrame extends GuiFrame {
             Graphics newGraphics = newImg.getGraphics();
             Picture newPic = new Picture(newImg);
             setPicture(newPic);
-            setDrawingPriority(1001);
             return;
         }
 
@@ -48,6 +47,5 @@ public class ImageFrame extends GuiFrame {
         g2.drawImage(img, xform, currentPic);
         Picture newPic = new Picture(scaledImage);
         setPicture(newPic);
-        setDrawingPriority(1000 + zIndex);
     }
 }

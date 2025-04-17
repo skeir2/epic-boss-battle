@@ -16,7 +16,7 @@ public class Entity extends Sprite {
         Engine.entityCreated(this);
     }
 
-    public Entity(int sizeX, int sizeY, Vector2 globalPosition, Color color) {
+    public Entity(int sizeX, int sizeY, Vector2 globalPosition, Color color, int drawingPriority) {
         super(Engine.getGameSpriteComponent().getScene());
 
         Image im1 = BasicFrame.createImage(sizeX, sizeY);
@@ -24,7 +24,7 @@ public class Entity extends Sprite {
         imgr.setColor(color);
         imgr.fillOval(0, 0, sizeX, sizeY);
         Picture p = new Picture(im1).transparentBright();
-
+        setDrawingPriority(drawingPriority);
         setPicture(p);
 
         setGlobalPosition(globalPosition);

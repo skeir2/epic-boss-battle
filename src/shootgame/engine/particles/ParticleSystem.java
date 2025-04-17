@@ -24,7 +24,7 @@ public class ParticleSystem extends Entity {
     private double startTick = Engine.getTick();
 
     public ParticleSystem(Vector2 position, Range velocityRangeX, Range velocityRangeY, Range accelerationRangeX, Range accelerationRangeY, Range lifespanRange, double rate) {
-        super(1, 1, position, Color.white);
+        super(1, 1, position, Color.white, -1);
 
         this.position = position;
         this.rate = rate;

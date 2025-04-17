@@ -12,20 +12,19 @@ public class GameUI {
     public static GuiFrame abilitiesHolder = null;
 
     public static GuiFrame addAbilityGuiFrame() {
-        GuiFrame abilityGuiFrame = new GuiFrame(new Vector2(0.5, 0.5), new Vector2(0.2, 1), new Vector2(0, 0));
+        GuiFrame abilityGuiFrame = new GuiFrame(new Vector2(0.5, 0.5), new Vector2(0.2, 1), new Vector2(0, 0), 1001);
         abilityGuiFrame.setParent(abilitiesHolder);
         abilityGuiFrame.setBackgroundColor(Color.blue);
 
-        ImageFrame imageFrame = new ImageFrame(new Vector2(0.5, 0.5), new Vector2(1, 1), new Vector2(0, 0), "gun.jpg");
+        ImageFrame imageFrame = new ImageFrame(new Vector2(0.5, 0.5), new Vector2(1, 1), new Vector2(0, 0), "gun.jpg", 1005);
         imageFrame.setParent(abilityGuiFrame);
-        imageFrame.setZIndex(-10000); // I have no idea how the draw order works
 
-        GuiFrame cooldownOverlayFrame = new GuiFrame(new Vector2(0.5, 0), new Vector2(1, 1), new Vector2(0, 0));
-        cooldownOverlayFrame.setAnchorPoint(new Vector2(0.5, 0));
+        GuiFrame cooldownOverlayFrame = new GuiFrame(new Vector2(0.5, 1), new Vector2(1, 1), new Vector2(0, 0), 1010);
+        cooldownOverlayFrame.setAnchorPoint(new Vector2(0.5, 1));
         cooldownOverlayFrame.setParent(abilityGuiFrame);
-        cooldownOverlayFrame.setZIndex(10000);
         cooldownOverlayFrame.setName("CooldownOverlay");
         cooldownOverlayFrame.setBackgroundColor(Color.green);
+        cooldownOverlayFrame.setBackgroundTransparency(0.5);
 
         // reposition abiility frames
         ArrayList<GuiFrame> children = abilitiesHolder.getChildren();
@@ -40,8 +39,7 @@ public class GameUI {
     }
 
     public static void init() {
-        abilitiesHolder = new GuiFrame(new Vector2(0.5, 0.9), new Vector2(0.3, 0.14), new Vector2(0, 0));
+        abilitiesHolder = new GuiFrame(new Vector2(0.5, 0.9), new Vector2(0.3, 0.14), new Vector2(0, 0), 1000);
         abilitiesHolder.setBackgroundColor(Color.gray);
-        abilitiesHolder.setZIndex(-10000);
     }
 }

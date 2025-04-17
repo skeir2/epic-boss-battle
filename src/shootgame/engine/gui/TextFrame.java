@@ -8,8 +8,8 @@ import java.awt.*;
 
 public class TextFrame extends GuiFrame {
     public String frameText = "PLACEHOLDER";
-    public TextFrame(Vector2 pos, Vector2 sizeScale, Vector2 sizeOffset, String frameText) {
-        super(pos, sizeScale, sizeOffset);
+    public TextFrame(Vector2 pos, Vector2 sizeScale, Vector2 sizeOffset, String frameText, int drawingPriority) {
+        super(pos, sizeScale, sizeOffset, drawingPriority);
         this.frameText = frameText;
         update(true);
     }
@@ -29,7 +29,6 @@ public class TextFrame extends GuiFrame {
             Graphics newGraphics = newImg.getGraphics();
             Picture newPic = new Picture(newImg);
             setPicture(newPic);
-            setDrawingPriority(1000 + zIndex);
             return;
         }
 
@@ -47,6 +46,5 @@ public class TextFrame extends GuiFrame {
         newGraphics.drawString(text, 0, (int) pixelSize.Y);
         Picture newPic = new Picture(newImg);
         setPicture(newPic);
-        setDrawingPriority(1000 + zIndex);
     }
 }

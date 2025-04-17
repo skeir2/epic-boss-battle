@@ -58,7 +58,7 @@ public abstract class Ability {
                 double currentTick = Engine.getTick();
                 double timePassed = (currentTick - lastUsedTime);
                 double progress = Math.clamp(timePassed / cooldown, 0, 1);
-                overlayChosen.setSizeScale(new Vector2(1.2, progress));
+                overlayChosen.setSizeScale(new Vector2(1, 1 - progress));
             }
         });
     }
