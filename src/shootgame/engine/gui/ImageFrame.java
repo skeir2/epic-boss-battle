@@ -12,14 +12,19 @@ import java.awt.image.ImageObserver;
 public class ImageFrame extends GuiFrame {
     private Picture currentPic;
     private String imageName;
+    private boolean initialized = false;
+
     public ImageFrame(Vector2 pos, Vector2 sizeScale, Vector2 sizeOffset, String imageName, int drawingPriority) {
         super(pos, sizeScale, sizeOffset, drawingPriority);
         this.imageName = imageName;
+        initialized = true;
         update(true);
     }
 
     @Override
     public void sizeChanged() {
+        if (!initialized) { return; }
+
         Vector2 pixelSize = getPixelSize();
 
         if ((int) pixelSize.X <= 0 || (int) pixelSize.Y <= 0) {

@@ -9,10 +9,22 @@ import shootgame.engine.gui.GuiFrame;
 public abstract class Ability {
     double lastUsedTime = 0;
     double cooldown = 0;
+    private boolean holding = false;
 
     public Ability(double cooldown) {
         this.cooldown = cooldown;
         this.lastUsedTime = Engine.getTick();
+
+        ClockWorker.addTask(new Task() {
+            @Override
+            public void run() {
+                if (holding) {
+                    if (canUse()) {
+                        use();
+                    }
+                }
+            }
+        });
     }
 
     public abstract void onUse();
@@ -34,6 +46,14 @@ public abstract class Ability {
         }
 
         return used;
+    }
+
+    public void startHold() {
+        holding = true;
+    }
+
+    public void releaseHold() {
+        holding = false;
     }
 
     public void connectToAbilityGuiFrame(GuiFrame abilityGuiFrame) {

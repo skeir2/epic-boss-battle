@@ -3,6 +3,7 @@ package shootgame;
 import basicgraphics.*;
 import basicgraphics.examples.BasicGraphics;
 import basicgraphics.images.Picture;
+import shootgame.abilities.DashAbility;
 import shootgame.abilities.ShootAbility;
 import shootgame.engine.Engine;
 import shootgame.engine.Range;
@@ -23,9 +24,9 @@ public class Game {
     public static Shooter shooter;
     static Random random = new Random();
     static String[][] layout = {
-            {"Top"},
+     //       {"Top"},
             {"Middle"},
-            {"Bottom"}
+    //        {"Bottom"}
     };
 
     public static void main(String[] args) {
@@ -40,7 +41,7 @@ public class Game {
                 JOptionPane.showMessageDialog(topButton, "hi");
             }
         });
-        mainFrame.add("Top", topButton);
+    //    mainFrame.add("Top", topButton);
 
         final JButton bottomButton = new JButton("Spawn enemy at random location");
         bottomButton.setFocusable(false);
@@ -51,7 +52,7 @@ public class Game {
                 enemy.setGlobalPosition(new Vector2(random.nextDouble(-100, 100), random.nextDouble(-100, 100)));
             }
         });
-        mainFrame.add("Bottom", bottomButton);
+    //    mainFrame.add("Bottom", bottomButton);
 
         Engine.init();
 
@@ -72,9 +73,13 @@ public class Game {
 
         GameUI.init();
 
-        GuiFrame shootAbilityGuiFrame = GameUI.addAbilityGuiFrame();
+        GuiFrame shootAbilityGuiFrame = GameUI.addAbilityGuiFrame("gun.jpg");
         ShootAbility shootAbility = new ShootAbility();
         shootAbility.connectToAbilityGuiFrame(shootAbilityGuiFrame);
+
+        GuiFrame dashAbilityGuiFrame = GameUI.addAbilityGuiFrame("evasion scarf.png");
+        DashAbility dashAbility = new DashAbility();
+        dashAbility.connectToAbilityGuiFrame(dashAbilityGuiFrame);
 
         KeyAdapter key = new KeyAdapter() {
             final List<Integer> shootCodes = Arrays.asList(
@@ -132,6 +137,10 @@ public class Game {
                     keysHeld.put(keycode, true);
                     updateShooterVelocity();
                 }
+
+                if (keycode == KeyEvent.VK_F) {
+                    dashAbility.startHold();
+                }
             }
 
             @Override
@@ -140,6 +149,10 @@ public class Game {
                 if (moveCodes.contains(keycode)) {
                     keysHeld.put(keycode, false);
                     updateShooterVelocity();
+                }
+
+                if (keycode == KeyEvent.VK_F) {
+                    dashAbility.releaseHold();
                 }
             }
         };
@@ -166,12 +179,12 @@ public class Game {
                 Vector2 direction = mouseClickGlobalPosition.subtract(shooterPosition).unit();
                 Bullet bullet = new Bullet(shooter.getGlobalPosition(), direction.multiply(700));
                  */
-                shootAbility.lastMouseEvent = e; //funny
-                shootAbility.use();
+                shootAbility.startHold();
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
+                shootAbility.releaseHold();
             }
 
             @Override

@@ -10,13 +10,14 @@ import java.util.ArrayList;
 
 public class GameUI {
     public static GuiFrame abilitiesHolder = null;
+    public static GuiFrame healthBarFrame = null;
 
-    public static GuiFrame addAbilityGuiFrame() {
+    public static GuiFrame addAbilityGuiFrame(String imageName) {
         GuiFrame abilityGuiFrame = new GuiFrame(new Vector2(0.5, 0.5), new Vector2(0.2, 1), new Vector2(0, 0), 1001);
         abilityGuiFrame.setParent(abilitiesHolder);
         abilityGuiFrame.setBackgroundColor(Color.blue);
 
-        ImageFrame imageFrame = new ImageFrame(new Vector2(0.5, 0.5), new Vector2(1, 1), new Vector2(0, 0), "gun.jpg", 1005);
+        ImageFrame imageFrame = new ImageFrame(new Vector2(0.5, 0.5), new Vector2(1, 1), new Vector2(0, 0), imageName, 1005);
         imageFrame.setParent(abilityGuiFrame);
 
         GuiFrame cooldownOverlayFrame = new GuiFrame(new Vector2(0.5, 1), new Vector2(1, 1), new Vector2(0, 0), 1010);
@@ -38,8 +39,17 @@ public class GameUI {
         return abilityGuiFrame;
     }
 
+    public static GuiFrame initializeHealthBarFrame() {
+        GuiFrame healthBarFrame = new GuiFrame(new Vector2(0, 0), new Vector2(0.25, 0.1), new Vector2(0, 0), 1001);
+        healthBarFrame.setBackgroundColor(Color.green);
+
+        return healthBarFrame;
+    }
+
     public static void init() {
         abilitiesHolder = new GuiFrame(new Vector2(0.5, 0.9), new Vector2(0.3, 0.14), new Vector2(0, 0), 1000);
         abilitiesHolder.setBackgroundColor(Color.gray);
+
+        healthBarFrame = initializeHealthBarFrame();
     }
 }
