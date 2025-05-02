@@ -8,6 +8,7 @@ import shootgame.engine.Range;
 import shootgame.engine.Vector2;
 
 import java.awt.*;
+import java.util.Vector;
 
 public class ParticleSystem extends Entity {
     private Range velocityRangeX;
@@ -22,6 +23,7 @@ public class ParticleSystem extends Entity {
     private double progress = 0;
     private int particlesToEmit = 0;
     private double startTick = Engine.getTick();
+    private Color particleColor = Color.BLUE;
 
     public ParticleSystem(Vector2 position, Range velocityRangeX, Range velocityRangeY, Range accelerationRangeX, Range accelerationRangeY, Range lifespanRange, double rate) {
         super(1, 1, position, Color.white, -1);
@@ -69,7 +71,23 @@ public class ParticleSystem extends Entity {
 
         Image im1 = BasicFrame.createImage((int) size.X, (int) size.Y);
         Graphics imgr = im1.getGraphics();
-        imgr.setColor(Color.BLUE);
+        imgr.setColor(particleColor);
+        imgr.fillOval(0, 0, (int) size.X, (int) size.Y);
+        Picture pic = new Picture(im1).transparentBright();
+
+        Particle particle = new Particle(pos, vel, accel, size, upVector, lifespan, pic);
+    }
+
+    private void emitParticle(Vector2 positionOverride) {
+        Vector2 pos = positionOverride;
+        Vector2 vel = new Vector2(velocityRangeX.getDouble(), velocityRangeY.getDouble());
+        Vector2 accel = new Vector2(accelerationRangeX.getDouble(), accelerationRangeY.getDouble());
+        Vector2 size = new Vector2(10, 10);
+        double lifespan = lifespanRange.getDouble();
+
+        Image im1 = BasicFrame.createImage((int) size.X, (int) size.Y);
+        Graphics imgr = im1.getGraphics();
+        imgr.setColor(particleColor);
         imgr.fillOval(0, 0, (int) size.X, (int) size.Y);
         Picture pic = new Picture(im1).transparentBright();
 
@@ -79,6 +97,12 @@ public class ParticleSystem extends Entity {
     public void emit(int amount) {
         for (int i = 0; i < amount; i++) {
             emitParticle();
+        }
+    }
+
+    public void emit(int amount, Vector2 positionOverride) {
+        for (int i = 0; i < amount; i++) {
+            emitParticle(positionOverride);
         }
     }
 
@@ -106,5 +130,9 @@ public class ParticleSystem extends Entity {
             particlesToEmit += Math.floor(progress);
             progress -= Math.floor(progress);
         }
+    }
+
+    public void setColor(Color color) {
+        this.particleColor = color;
     }
 }

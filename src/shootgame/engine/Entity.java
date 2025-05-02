@@ -28,7 +28,18 @@ public class Entity extends Sprite {
         setPicture(p);
 
         setGlobalPosition(globalPosition);
+        Engine.entityCreated(this);
+    }
 
+    public Entity(int sizeX, int sizeY, Vector2 globalPosition, String imageName, int drawingPriority) {
+        super(Engine.getGameSpriteComponent().getScene());
+
+        Picture p = new Picture(imageName);
+        p.setSize(sizeX, sizeY);
+        setDrawingPriority(drawingPriority);
+        setPicture(p);
+
+        setGlobalPosition(globalPosition);
         Engine.entityCreated(this);
     }
 

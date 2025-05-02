@@ -38,6 +38,14 @@ public class Vector2 {
         return new Vector2(X / scaleFactor, Y / scaleFactor);
     }
 
+    // Thanks https://matthew-brett.github.io/teaching/rotation_2d.html
+    public Vector2 rotate(double angle) {
+        double x = this.X * Math.cos(angle) - this.Y * Math.sin(angle);
+        double y = this.X * Math.sin(angle) + this.Y * Math.cos(angle);
+
+        return new Vector2(x, y);
+    }
+
     public static Vector2 lerp(Vector2 a, Vector2 b, double t) {
         Vector2 difference = b.subtract(a);
         return a.add(difference.multiply(t));

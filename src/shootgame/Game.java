@@ -1,27 +1,28 @@
 package shootgame;
 
 import basicgraphics.*;
-import basicgraphics.examples.BasicGraphics;
-import basicgraphics.images.Picture;
 import shootgame.abilities.DashAbility;
+import shootgame.abilities.HealAbility;
 import shootgame.abilities.ShootAbility;
+import shootgame.enemies.BossEnemy;
+import shootgame.enemies.Enemy;
+import shootgame.enemies.RegularEnemy;
+import shootgame.enemies.ShotgunEnemy;
 import shootgame.engine.Engine;
 import shootgame.engine.Range;
 import shootgame.engine.Vector2;
 import shootgame.engine.gui.GuiFrame;
-import shootgame.engine.gui.ImageFrame;
-import shootgame.engine.gui.TextFrame;
 import shootgame.engine.particles.ParticleSystem;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.time.Clock;
 import java.util.*;
 import java.util.List;
 
 public class Game {
     public static Shooter shooter;
+    public static BossEnemy boss;
     static Random random = new Random();
     static String[][] layout = {
      //       {"Top"},
@@ -29,30 +30,19 @@ public class Game {
     //        {"Bottom"}
     };
 
+    public static HashMap<Integer, Boolean> keysHeld = new HashMap<Integer, Boolean>();
+    static {
+        keysHeld.put(KeyEvent.VK_W, false);
+        keysHeld.put(KeyEvent.VK_A, false);
+        keysHeld.put(KeyEvent.VK_S, false);
+        keysHeld.put(KeyEvent.VK_D, false);
+    }
+
+    public static LinkedList<EnemyBulletBill> enemyBulletQueue = new LinkedList<>();
+
     public static void main(String[] args) {
         BasicFrame mainFrame = new BasicFrame("Shooter Game");
         mainFrame.setStringLayout(layout);
-
-        final JButton topButton = new JButton("Top button");
-        topButton.setFocusable(false);
-        topButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                JOptionPane.showMessageDialog(topButton, "hi");
-            }
-        });
-    //    mainFrame.add("Top", topButton);
-
-        final JButton bottomButton = new JButton("Spawn enemy at random location");
-        bottomButton.setFocusable(false);
-        bottomButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                Enemy enemy = new Enemy();
-                enemy.setGlobalPosition(new Vector2(random.nextDouble(-100, 100), random.nextDouble(-100, 100)));
-            }
-        });
-    //    mainFrame.add("Bottom", bottomButton);
 
         Engine.init();
 
@@ -63,12 +53,13 @@ public class Game {
 
         // gaming
         shooter = new Shooter();
+        System.out.println("shooter created");
         Engine.setCameraTarget(shooter);
+        System.out.println("camera target set to shooter");
+        Enemy regular = new RegularEnemy();
+        regular.setGlobalPosition(new Vector2(0, 0));
 
-        Enemy enemy = new Enemy();
-        enemy.setGlobalPosition(new Vector2(0, 0));
-
-        Enemy enemy2 = new Enemy();
+        Enemy enemy2 = new ShotgunEnemy();
         enemy2.setGlobalPosition(new Vector2(50, 50));
 
         GameUI.init();
@@ -80,6 +71,10 @@ public class Game {
         GuiFrame dashAbilityGuiFrame = GameUI.addAbilityGuiFrame("evasion scarf.png");
         DashAbility dashAbility = new DashAbility();
         dashAbility.connectToAbilityGuiFrame(dashAbilityGuiFrame);
+
+        GuiFrame healAbilityGuiFrame = GameUI.addAbilityGuiFrame("health pot.jpg");
+        HealAbility healAbility = new HealAbility();
+        healAbility.connectToAbilityGuiFrame(healAbilityGuiFrame);
 
         KeyAdapter key = new KeyAdapter() {
             final List<Integer> shootCodes = Arrays.asList(
@@ -94,52 +89,21 @@ public class Game {
                     KeyEvent.VK_S,
                     KeyEvent.VK_D
             );
-            HashMap<Integer, Boolean> keysHeld = new HashMap<Integer, Boolean>();
-            {
-                keysHeld.put(KeyEvent.VK_W, false);
-                keysHeld.put(KeyEvent.VK_A, false);
-                keysHeld.put(KeyEvent.VK_S, false);
-                keysHeld.put(KeyEvent.VK_D, false);
-            }
-
-            private void updateShooterVelocity() {
-                int xDir = 0;
-                int yDir = 0;
-                int speed = 250;
-
-                if (keysHeld.get(KeyEvent.VK_W)) {
-                    yDir = 1;
-                }
-                if (keysHeld.get(KeyEvent.VK_S)) {
-                    yDir = -1;
-                }
-                if (keysHeld.get(KeyEvent.VK_W) && keysHeld.get(KeyEvent.VK_S)) {
-                    yDir = 0;
-                }
-                if (keysHeld.get(KeyEvent.VK_D)) {
-                    xDir = 1;
-                }
-                if (keysHeld.get(KeyEvent.VK_A)) {
-                    xDir = -1;
-                }
-                if (keysHeld.get(KeyEvent.VK_A) && keysHeld.get(KeyEvent.VK_D)) {
-                    xDir = 0;
-                }
-
-                Vector2 velocity = (new Vector2(xDir, yDir)).unit().multiply(speed);
-                shooter.setVelocity(velocity);
-            }
 
             @Override
             public void keyPressed(KeyEvent ke) {
                 int keycode = ke.getKeyCode();
                 if (moveCodes.contains(keycode)) {
                     keysHeld.put(keycode, true);
-                    updateShooterVelocity();
+                    shooter.updateShooterVelocity();
                 }
 
                 if (keycode == KeyEvent.VK_F) {
                     dashAbility.startHold();
+                }
+
+                if (keycode == KeyEvent.VK_H) {
+                    healAbility.startHold();
                 }
             }
 
@@ -148,11 +112,15 @@ public class Game {
                 int keycode = ke.getKeyCode();
                 if (moveCodes.contains(keycode)) {
                     keysHeld.put(keycode, false);
-                    updateShooterVelocity();
+                    shooter.updateShooterVelocity();
                 }
 
                 if (keycode == KeyEvent.VK_F) {
                     dashAbility.releaseHold();
+                }
+
+                if (keycode == KeyEvent.VK_H) {
+                    healAbility.releaseHold();
                 }
             }
         };
@@ -161,7 +129,7 @@ public class Game {
         Vector2 offset = new Vector2(0, 0);
         Engine.setCameraOffset(offset);
 
-        Background bg = new Background();
+        SummoningCircle bg = new SummoningCircle();
 
         // mouse
         MouseListener ml = new MouseListener() {
@@ -198,11 +166,19 @@ public class Game {
         gameSpriteComponent.addMouseListener(ml);
 
         // collisions
-        gameSpriteComponent.addSpriteSpriteCollisionListener(shootgame.Enemy.class, shootgame.Bullet.class, new SpriteSpriteCollisionListener<shootgame.Enemy, shootgame.Bullet>() {
+        gameSpriteComponent.addSpriteSpriteCollisionListener(Enemy.class, shootgame.Bullet.class, new SpriteSpriteCollisionListener<Enemy, shootgame.Bullet>() {
             @Override
-            public void collision(shootgame.Enemy enemy, shootgame.Bullet bullet) {
+            public void collision(Enemy enemy, shootgame.Bullet bullet) {
                 bullet.destroy();
                 enemy.takeDamage(25);
+            }
+        });
+
+        gameSpriteComponent.addSpriteSpriteCollisionListener(shootgame.Shooter.class, shootgame.EnemyBullet.class, new SpriteSpriteCollisionListener<shootgame.Shooter, shootgame.EnemyBullet>() {
+            @Override
+            public void collision(shootgame.Shooter shooter, shootgame.EnemyBullet enemyBullet) {
+                enemyBullet.destroy();
+                shooter.takeDamage(5);
             }
         });
 
@@ -217,8 +193,11 @@ public class Game {
                 250
         );
 
-        particles.setEnabled(true);
+        particles.setEnabled(false);
+    //    particles.emit(10);
 
+        GuiFrame guiFrame = new GuiFrame(new Vector2(0.5, 0.5), new Vector2(1, 1), new Vector2(0, 0), -10000);
+        guiFrame.setBackgroundColor(Color.black);
         // frame
         /*
         TextFrame rotationTextFrame = new TextFrame(new Vector2(0.5, 0.5), new Vector2(1, 1), new Vector2(0, 0), "1");
@@ -256,5 +235,9 @@ public class Game {
             }
         });
          */
+    }
+
+    public static void queueEnemyBullet(Vector2 origin, Vector2 velocity, int size, double damage) {
+        enemyBulletQueue.add(new EnemyBulletBill(origin, velocity, size, damage));
     }
 }

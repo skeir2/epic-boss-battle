@@ -1,7 +1,6 @@
-package shootgame;
+package shootgame.enemies;
 
-import basicgraphics.ClockWorker;
-import basicgraphics.Task;
+import shootgame.Game;
 import shootgame.engine.Engine;
 import shootgame.engine.Entity;
 import shootgame.engine.Vector2;
@@ -9,21 +8,14 @@ import shootgame.engine.Vector2;
 import java.awt.*;
 import java.util.Random;
 
-public class Enemy extends Entity {
+public class RegularEnemy extends Enemy {
     static Random random = new Random();
     double speed = random.nextDouble(40, 200);
-    private double health = 100;
+    private double lastShootTick = Engine.getTick();
+    private double shootCooldown = 2;
 
-    public Enemy() {
-        super(40, 40, new Vector2(0, 0), Color.orange, 10);
-    }
-
-    public void takeDamage(double damage) {
-        health -= damage;
-
-        if (health <= 0) {
-            markForDestruction();
-        }
+    public RegularEnemy() {
+        super(40, Color.yellow);
     }
 
     @Override
@@ -36,5 +28,12 @@ public class Enemy extends Entity {
         Vector2 velocity = direction.multiply(speed);
 
         setVelocity(velocity);
+
+        if (Engine.getTick() - lastShootTick > shootCooldown) {
+            // shoot
+            Vector2 bulletVelocity = direction.multiply(500);
+            Game.queueEnemyBullet(this.getGlobalPosition(), bulletVelocity.rotate(Math.toRadians(15)), 12, 10);
+            lastShootTick = Engine.getTick();
+        }
     }
 }

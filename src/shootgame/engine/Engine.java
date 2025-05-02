@@ -1,15 +1,17 @@
 package shootgame.engine;
 
 import basicgraphics.ClockWorker;
-import basicgraphics.Sprite;
 import basicgraphics.SpriteComponent;
 import basicgraphics.Task;
-import shootgame.Enemy;
+import shootgame.*;
+import shootgame.enemies.BossEnemy;
+import shootgame.enemies.Enemy;
+import shootgame.enemies.RegularEnemy;
+import shootgame.enemies.ShotgunEnemy;
 import shootgame.engine.particles.ParticleSystem;
 
 import java.awt.event.MouseEvent;
 import java.time.Clock;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -24,19 +26,33 @@ public class Engine {
 
     private static Clock clock = Clock.systemDefaultZone();
     private static long lastTickTime = clock.millis();
+    private static double gameStartTick;
 
     private static double spawnerTimer = 0;
+    private static double bossSpawnTime = 1;
+    private static boolean bossSpawned = false;
 
     public static void update(double deltaTime) {
-        spawnerTimer += deltaTime;
+        boolean spawnBoss = false;
+        if (!bossSpawned) {
+            spawnerTimer += deltaTime;
 
-        if (spawnerTimer > 3) {
-            spawnerTimer -= 3;
+            if (spawnerTimer > 3) {
+                spawnerTimer -= 3;
 
-            Enemy enemy = new Enemy();
+                Enemy enemy = new RegularEnemy();
 
-            Vector2 randomPosition = new Vector2(random.nextDouble(-100, 100), random.nextDouble(-100, 100));
-            enemy.setGlobalPosition(randomPosition);
+                Vector2 randomPosition = new Vector2(random.nextDouble(-100, 100), random.nextDouble(-100, 100));
+                enemy.setGlobalPosition(randomPosition);
+
+                ShotgunEnemy shotgunEnemy = new ShotgunEnemy();
+                Vector2 randomPosition2 = new Vector2(random.nextDouble(-100, 100), random.nextDouble(-100, 100));
+                shotgunEnemy.setGlobalPosition(randomPosition2);
+            }
+
+            if (getTick() - gameStartTick > bossSpawnTime) {
+                spawnBoss = true;
+            }
         }
 
         ArrayList<Entity> entitiesMarkedForDestruction = new ArrayList<Entity>();
@@ -86,12 +102,27 @@ public class Engine {
         for (Entity entityMarkedForDestruction : entitiesMarkedForDestruction) {
             entityMarkedForDestruction.destroy();
         }
+
+        for (EnemyBulletBill enemyBulletBill : Game.enemyBulletQueue) {
+            EnemyBullet bullet = new EnemyBullet(enemyBulletBill.origin, enemyBulletBill.velocity, enemyBulletBill.size, enemyBulletBill.damage);
+        }
+        Game.enemyBulletQueue.clear();
+
+        if (spawnBoss) {
+            bossSpawned = true;
+
+            BossEnemy boss = new BossEnemy();
+            Game.boss = boss;
+
+            GameUI.initializeBossHealthBarFrame();
+        }
     }
 
     public static void init() {
         gameSpriteComponent = new SpriteComponent();
 
         long lastTickTime = clock.millis();
+        gameStartTick = getTick();
 
         ClockWorker.addTask(new updateTask());
 
