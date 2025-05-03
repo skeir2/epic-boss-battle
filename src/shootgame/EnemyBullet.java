@@ -10,12 +10,16 @@ import shootgame.engine.Vector2;
 
 import java.awt.*;
 
+import static shootgame.Game.shooter;
+
 public class EnemyBullet extends Entity {
     private double creationTick = Engine.getTick();
     private double lifespan = 1;
-    private double damage = 0;
+    public double damage = 0;
+    private int bulletType = 1;
+    private double speed = 0;
 
-    public EnemyBullet(Vector2 origin, Vector2 velocity, int size, double damage) {
+    public EnemyBullet(Vector2 origin, Vector2 velocity, int size, double damage, double lifespan, int bulletType) {
         super(size, size, new Vector2(0, 0), Color.pink, 20);
 
         Image im1 = BasicFrame.createImage(size, size);
@@ -31,11 +35,21 @@ public class EnemyBullet extends Entity {
         setVelocity(velocity);
 
         this.damage = damage;
+        this.lifespan = lifespan;
+        this.bulletType = bulletType;
+        this.speed = velocity.magnitude();
     }
 
     @Override
     public void update(double deltaTime) {
         double timePassed = Engine.getTick() - creationTick;
+
+        if (bulletType == 2) {
+            Vector2 targetPosition = shooter.getGlobalPosition();
+            Vector2 targetLookAt = (targetPosition.subtract(this.getGlobalPosition())).unit();
+            Vector2 newDirection = Vector2.lerp(this.getVelocity().unit(), targetLookAt, 0.05);
+            this.setVelocity(newDirection.multiply(speed));
+        }
 
         if (timePassed >= lifespan) {
             markForDestruction();

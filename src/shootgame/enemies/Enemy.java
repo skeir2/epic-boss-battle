@@ -23,6 +23,8 @@ public abstract class Enemy extends Entity {
         health -= damage;
 
         if (health <= 0) {
+            Game.enemyDieSound.playOverlapping();
+            onDeath();
             markForDestruction();
         }
 
@@ -30,6 +32,10 @@ public abstract class Enemy extends Entity {
     }
 
     public void damageTaken() {
+
+    }
+
+    public void onDeath() {
 
     }
 

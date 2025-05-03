@@ -1,6 +1,7 @@
 package shootgame.abilities;
 
 import shootgame.Bullet;
+import shootgame.Game;
 import shootgame.GameUI;
 import shootgame.engine.Engine;
 import shootgame.engine.Range;
@@ -16,7 +17,7 @@ public class HealAbility extends Ability {
     ParticleSystem healParticles;
 
     public HealAbility() {
-        super(1);
+        super(20);
 
         ParticleSystem particles = new ParticleSystem(
                 new Vector2(0, 0),
@@ -33,8 +34,9 @@ public class HealAbility extends Ability {
     }
 
     public void onUse() {
-        shooter.health = Math.clamp(shooter.health + 25, 0, 100);
+        shooter.health = Math.clamp(shooter.health + 70, 0, 100);
         healParticles.emit(10, shooter.getGlobalPosition());
         GameUI.updateHealthBar();
+        Game.healSound.playOverlapping();
     }
 }

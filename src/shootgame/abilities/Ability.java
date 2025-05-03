@@ -6,6 +6,9 @@ import shootgame.engine.Engine;
 import shootgame.engine.Vector2;
 import shootgame.engine.gui.GuiFrame;
 
+import static shootgame.Game.died;
+import static shootgame.Game.shooter;
+
 public abstract class Ability {
     double lastUsedTime = 0;
     double cooldown = 0;
@@ -32,6 +35,10 @@ public abstract class Ability {
     public boolean canUse() {
         double currentTick = Engine.getTick();
         double timePassed = (currentTick - lastUsedTime);
+
+        if (died) {
+            return false;
+        }
 
         return (timePassed >= cooldown);
     }

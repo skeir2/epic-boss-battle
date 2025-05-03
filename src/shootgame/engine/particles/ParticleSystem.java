@@ -16,6 +16,7 @@ public class ParticleSystem extends Entity {
     private Range accelerationRangeX;
     private Range accelerationRangeY;
     private Range lifespanRange;
+    private Range sizeRange = new Range(5, 10);
     private Vector2 position;
     private Vector2 upVector = new Vector2(0, 1);
     private double rate = 10;
@@ -66,7 +67,7 @@ public class ParticleSystem extends Entity {
         Vector2 pos = position;
         Vector2 vel = new Vector2(velocityRangeX.getDouble(), velocityRangeY.getDouble());
         Vector2 accel = new Vector2(accelerationRangeX.getDouble(), accelerationRangeY.getDouble());
-        Vector2 size = new Vector2(10, 10);
+        Vector2 size = new Vector2(sizeRange.getDouble(), sizeRange.getDouble());
         double lifespan = lifespanRange.getDouble();
 
         Image im1 = BasicFrame.createImage((int) size.X, (int) size.Y);
@@ -82,7 +83,7 @@ public class ParticleSystem extends Entity {
         Vector2 pos = positionOverride;
         Vector2 vel = new Vector2(velocityRangeX.getDouble(), velocityRangeY.getDouble());
         Vector2 accel = new Vector2(accelerationRangeX.getDouble(), accelerationRangeY.getDouble());
-        Vector2 size = new Vector2(10, 10);
+        Vector2 size = new Vector2(sizeRange.getDouble(), sizeRange.getDouble());
         double lifespan = lifespanRange.getDouble();
 
         Image im1 = BasicFrame.createImage((int) size.X, (int) size.Y);
@@ -134,5 +135,9 @@ public class ParticleSystem extends Entity {
 
     public void setColor(Color color) {
         this.particleColor = color;
+    }
+
+    public void setSizeRange(Range sizeRange) {
+        this.sizeRange = sizeRange;
     }
 }

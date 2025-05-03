@@ -1,6 +1,9 @@
 package shootgame;
 
 import basicgraphics.*;
+import basicgraphics.images.BackgroundPainter;
+import basicgraphics.images.Picture;
+import basicgraphics.sounds.ReusableClip;
 import shootgame.abilities.DashAbility;
 import shootgame.abilities.HealAbility;
 import shootgame.abilities.ShootAbility;
@@ -24,6 +27,8 @@ public class Game {
     public static Shooter shooter;
     public static BossEnemy boss;
     static Random random = new Random();
+    public static boolean died = false;
+    public static ParticleSystem bulletParticles;
     static String[][] layout = {
      //       {"Top"},
             {"Middle"},
@@ -40,15 +45,85 @@ public class Game {
 
     public static LinkedList<EnemyBulletBill> enemyBulletQueue = new LinkedList<>();
 
+    public static ReusableClip healSound;
+    public static ReusableClip dashSound;
+    public static ReusableClip enemyDieSound;
+    public static ReusableClip playerDamagedSound;
+    public static ReusableClip bossTheme;
+
     public static void main(String[] args) {
-        BasicFrame mainFrame = new BasicFrame("Shooter Game");
-        mainFrame.setStringLayout(layout);
+        BasicFrame mainFrame = new BasicFrame("Simple Bullet Hell Battle");
 
         Engine.init();
 
         SpriteComponent gameSpriteComponent = Engine.getGameSpriteComponent();
 
-        mainFrame.add("Middle", gameSpriteComponent);
+        // CARDS
+        // game card
+        Card gameCard = mainFrame.getCard();
+        gameCard.setStringLayout(layout);
+        gameCard.add("Middle", gameSpriteComponent);
+        gameCard.setPainter(new BackgroundPainter(new Picture("grey background.png")));
+
+        // info screen
+        Card infoCard = mainFrame.getCard();
+
+        infoCard.setPainter(new BackgroundPainter(new Picture("info card.png")));
+        String[][] infoLayout = {
+                {"Title"},
+                {"PlayButton"}
+        };
+        infoCard.setStringLayout(infoLayout);
+        JLabel blankTitle = new JLabel("");
+        blankTitle.setForeground(Color.white);
+        infoCard.add("Title", blankTitle);
+        JButton beginButton = new JButton("Begin Trial");
+        beginButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                healSound = new ReusableClip("Potion.wav");
+                dashSound = new ReusableClip("Dash.wav");
+                enemyDieSound = new ReusableClip("GlassBreak.wav");
+                playerDamagedSound = new ReusableClip("TerrariaHurt.wav");
+                bossTheme = new ReusableClip("TeamGrimoireDantalion.wav");
+
+                Engine.gameStartTick = Engine.getTick();
+                Engine.lastTickTime = Engine.clock.millis();
+                gameCard.showCard();
+                // The BasicContainer bc2 must request the focus
+                // otherwise, it can't get keyboard events.
+                gameCard.requestFocus();
+
+                // Start the timer
+                ClockWorker.initialize(16);
+            }
+        });
+        infoCard.add("PlayButton",beginButton);
+
+        // title
+        Card titleCard = mainFrame.getCard();
+
+        titleCard.setPainter(new BackgroundPainter(new Picture("title card.png")));
+        String[][] titleLayout = {
+                {"Title"},
+                {"PlayButton"}
+        };
+        titleCard.setStringLayout(titleLayout);
+        JLabel title = new JLabel("Welcome!");
+        title.setForeground(Color.white);
+        titleCard.add("Title", title);
+        JButton jstart = new JButton("Start");
+        jstart.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                infoCard.showCard();
+                infoCard.requestFocus();
+            }
+        });
+        titleCard.add("PlayButton",jstart);
+        titleCard.showCard();
+
+    //    gameCard.showCard();
         mainFrame.show();
 
         // gaming
@@ -56,6 +131,7 @@ public class Game {
         System.out.println("shooter created");
         Engine.setCameraTarget(shooter);
         System.out.println("camera target set to shooter");
+        shooter.setGlobalPosition(new Vector2(-300, 0));
         Enemy regular = new RegularEnemy();
         regular.setGlobalPosition(new Vector2(0, 0));
 
@@ -124,7 +200,7 @@ public class Game {
                 }
             }
         };
-        mainFrame.addKeyListener(key);
+        gameCard.addKeyListener(key);
 
         Vector2 offset = new Vector2(0, 0);
         Engine.setCameraOffset(offset);
@@ -165,10 +241,49 @@ public class Game {
         };
         gameSpriteComponent.addMouseListener(ml);
 
+        // particle
+        ParticleSystem bulletParticles = new ParticleSystem(
+                new Vector2(0, 0),
+                new Range(-250, 250),
+                new Range(-250, 250),
+                new Range(-250, 250),
+                new Range(-250, 250),
+                new Range(0.1, 0.5),
+                250
+        );
+        bulletParticles.setColor(Color.yellow);
+        bulletParticles.setSizeRange(new Range(3, 6));
+        Game.bulletParticles = bulletParticles;
+
+        ParticleSystem bulletDebrisParticles = new ParticleSystem(
+                new Vector2(0, 0),
+                new Range(-50, 50),
+                new Range(-50, 50),
+                new Range(-50, 50),
+                new Range(-50, 50),
+                new Range(0.1, 0.5),
+                250
+        );
+        bulletDebrisParticles.setColor(Color.yellow);
+        bulletDebrisParticles.setSizeRange(new Range(3, 6));
+
+        ParticleSystem redBulletDebrisParticles = new ParticleSystem(
+                new Vector2(0, 0),
+                new Range(-50, 50),
+                new Range(-50, 50),
+                new Range(-50, 50),
+                new Range(-50, 50),
+                new Range(0.1, 0.5),
+                250
+        );
+        redBulletDebrisParticles.setColor(Color.red);
+        redBulletDebrisParticles.setSizeRange(new Range(3, 6));
+
         // collisions
         gameSpriteComponent.addSpriteSpriteCollisionListener(Enemy.class, shootgame.Bullet.class, new SpriteSpriteCollisionListener<Enemy, shootgame.Bullet>() {
             @Override
             public void collision(Enemy enemy, shootgame.Bullet bullet) {
+                bulletDebrisParticles.emit(3, bullet.getGlobalPosition());
                 bullet.destroy();
                 enemy.takeDamage(25);
             }
@@ -177,24 +292,14 @@ public class Game {
         gameSpriteComponent.addSpriteSpriteCollisionListener(shootgame.Shooter.class, shootgame.EnemyBullet.class, new SpriteSpriteCollisionListener<shootgame.Shooter, shootgame.EnemyBullet>() {
             @Override
             public void collision(shootgame.Shooter shooter, shootgame.EnemyBullet enemyBullet) {
-                enemyBullet.destroy();
-                shooter.takeDamage(5);
+                if (!died) {
+                    redBulletDebrisParticles.emit(3, enemyBullet.getGlobalPosition());
+                    playerDamagedSound.playOverlapping();
+                    enemyBullet.destroy();
+                    shooter.takeDamage(enemyBullet.damage);
+                }
             }
         });
-
-        // particle
-        ParticleSystem particles = new ParticleSystem(
-                new Vector2(0, 0),
-                new Range(-25, 25),
-                new Range(150, 700),
-                new Range(-3, 3),
-                new Range(-100, 3),
-                new Range(1, 2),
-                250
-        );
-
-        particles.setEnabled(false);
-    //    particles.emit(10);
 
         GuiFrame guiFrame = new GuiFrame(new Vector2(0.5, 0.5), new Vector2(1, 1), new Vector2(0, 0), -10000);
         guiFrame.setBackgroundColor(Color.black);
@@ -237,7 +342,17 @@ public class Game {
          */
     }
 
-    public static void queueEnemyBullet(Vector2 origin, Vector2 velocity, int size, double damage) {
-        enemyBulletQueue.add(new EnemyBulletBill(origin, velocity, size, damage));
+    public static void queueEnemyBullet(Vector2 origin, Vector2 velocity, int size, double damage, double lifespan, int bulletType) {
+        enemyBulletQueue.add(new EnemyBulletBill(origin, velocity, size, damage, lifespan, bulletType));
+    }
+
+    public static void onDied() {
+        if (!died) {
+            died = true;
+            BasicDialog.getOK("You died!");
+            shooter.setCostume("dead apple.png");
+            System.exit(0);
+            shooter.setVelocity(new Vector2(0, 0));
+        }
     }
 }

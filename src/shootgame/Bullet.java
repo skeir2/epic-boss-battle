@@ -12,7 +12,7 @@ import java.awt.*;
 
 public class Bullet extends Entity {
     private double creationTick = Engine.getTick();
-    private double lifespan = 1;
+    private double lifespan = 5;
 
     public Bullet(Vector2 origin, Vector2 velocity) {
         super(15, 15, new Vector2(0, 0), Color.yellow, 20);

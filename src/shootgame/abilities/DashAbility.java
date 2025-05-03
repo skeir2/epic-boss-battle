@@ -3,6 +3,7 @@ package shootgame.abilities;
 import basicgraphics.ClockWorker;
 import basicgraphics.Task;
 import shootgame.Bullet;
+import shootgame.Game;
 import shootgame.engine.Engine;
 import shootgame.engine.Vector2;
 
@@ -39,5 +40,6 @@ public class DashAbility extends Ability {
         dashing = true;
         dashTick = Engine.getTick();
         shooter.controllable = false;
+        Game.dashSound.playOverlapping();
     }
 }

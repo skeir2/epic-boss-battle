@@ -3,11 +3,13 @@ package shootgame;
 import basicgraphics.*;
 import basicgraphics.images.Picture;
 import shootgame.engine.*;
+import shootgame.engine.particles.ParticleSystem;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.time.Clock;
 
+import static shootgame.Game.died;
 import static shootgame.Game.keysHeld;
 
 public class Shooter extends Entity {
@@ -15,7 +17,7 @@ public class Shooter extends Entity {
     public double health = 100;
 
     public Shooter() {
-        super(40, 40, new Vector2(0, 0), "apple.png", 15);
+        super(40, 40, new Vector2(0, 0), new String[]{"apple.png", "dead apple.png"}, 15);
     }
 
     @Override
@@ -48,6 +50,10 @@ public class Shooter extends Entity {
         if (keysHeld.get(KeyEvent.VK_A) && keysHeld.get(KeyEvent.VK_D)) {
             xDir = 0;
         }
+        if (died) {
+            xDir = 0;
+            yDir = 0;
+        }
 
         return (new Vector2(xDir, yDir)).unit();
     }
@@ -67,5 +73,8 @@ public class Shooter extends Entity {
     public void takeDamage(double damage) {
         this.health = Math.clamp(this.health - damage, 0, 100);
         GameUI.updateHealthBar();
+        if (this.health == 0) {
+            Game.onDied();
+        }
     }
 }

@@ -4,12 +4,15 @@ import basicgraphics.*;
 import basicgraphics.images.Picture;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Entity extends Sprite {
     static int ballSize = 40;
     private Vector2 globalPosition = new Vector2(0, 0);
     private Vector2 velocity = new Vector2(0, 0);
     private boolean markedForDestruction = false;
+    private HashMap<String, Picture> costumes = new HashMap<>();
 
     public Entity() {
         super(Engine.getGameSpriteComponent().getScene());
@@ -41,6 +44,26 @@ public class Entity extends Sprite {
 
         setGlobalPosition(globalPosition);
         Engine.entityCreated(this);
+    }
+
+    public Entity(int sizeX, int sizeY, Vector2 globalPosition, String[] imageNames, int drawingPriority) {
+        super(Engine.getGameSpriteComponent().getScene());
+
+        for (String imageName : imageNames) {
+            Picture p = new Picture(imageName);
+            p.setSize(sizeX, sizeY);
+            costumes.put(imageName, p);
+        }
+
+        setDrawingPriority(drawingPriority);
+        setPicture(costumes.get(imageNames[0]));
+
+        setGlobalPosition(globalPosition);
+        Engine.entityCreated(this);
+    }
+
+    public void setCostume(String costumeName) {
+        setPicture(costumes.get(costumeName));
     }
 
     public Vector2 getGlobalPosition() {

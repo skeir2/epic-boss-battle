@@ -24,12 +24,12 @@ public class Engine {
     private static Entity cameraTarget;
     private static Vector2 cameraOffset = new Vector2(0, 0);
 
-    private static Clock clock = Clock.systemDefaultZone();
-    private static long lastTickTime = clock.millis();
-    private static double gameStartTick;
+    public static Clock clock = Clock.systemDefaultZone();
+    public static long lastTickTime = clock.millis();
+    public static double gameStartTick;
 
     private static double spawnerTimer = 0;
-    private static double bossSpawnTime = 1;
+    private static double bossSpawnTime = 25;
     private static boolean bossSpawned = false;
 
     public static void update(double deltaTime) {
@@ -40,10 +40,11 @@ public class Engine {
             if (spawnerTimer > 3) {
                 spawnerTimer -= 3;
 
-                Enemy enemy = new RegularEnemy();
-
-                Vector2 randomPosition = new Vector2(random.nextDouble(-100, 100), random.nextDouble(-100, 100));
-                enemy.setGlobalPosition(randomPosition);
+                for (int i = 0; i < 3; i++) {
+                    Enemy enemy = new RegularEnemy();
+                    Vector2 randomPosition = new Vector2(random.nextDouble(-100, 100), random.nextDouble(-100, 100));
+                    enemy.setGlobalPosition(randomPosition);
+                }
 
                 ShotgunEnemy shotgunEnemy = new ShotgunEnemy();
                 Vector2 randomPosition2 = new Vector2(random.nextDouble(-100, 100), random.nextDouble(-100, 100));
@@ -104,7 +105,7 @@ public class Engine {
         }
 
         for (EnemyBulletBill enemyBulletBill : Game.enemyBulletQueue) {
-            EnemyBullet bullet = new EnemyBullet(enemyBulletBill.origin, enemyBulletBill.velocity, enemyBulletBill.size, enemyBulletBill.damage);
+            EnemyBullet bullet = new EnemyBullet(enemyBulletBill.origin, enemyBulletBill.velocity, enemyBulletBill.size, enemyBulletBill.damage, enemyBulletBill.lifespan, enemyBulletBill.bulletType);
         }
         Game.enemyBulletQueue.clear();
 
@@ -113,6 +114,8 @@ public class Engine {
 
             BossEnemy boss = new BossEnemy();
             Game.boss = boss;
+
+            Game.bossTheme.playOverlapping();
 
             GameUI.initializeBossHealthBarFrame();
         }
@@ -127,7 +130,7 @@ public class Engine {
         ClockWorker.addTask(new updateTask());
 
         ClockWorker.addTask(gameSpriteComponent.moveSprites());
-        ClockWorker.initialize(16);
+    //    ClockWorker.initialize(16);
     }
 
     public static SpriteComponent getGameSpriteComponent() {

@@ -32,8 +32,10 @@ public class RegularEnemy extends Enemy {
         if (Engine.getTick() - lastShootTick > shootCooldown) {
             // shoot
             Vector2 bulletVelocity = direction.multiply(500);
-            Game.queueEnemyBullet(this.getGlobalPosition(), bulletVelocity.rotate(Math.toRadians(15)), 12, 10);
+            Game.queueEnemyBullet(this.getGlobalPosition(), bulletVelocity.rotate(Math.toRadians(15)), 12, 10, 5, 1);
             lastShootTick = Engine.getTick();
+
+
         }
     }
 }
